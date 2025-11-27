@@ -10,6 +10,7 @@ use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\StudentSubmissionController;
 
 
+
 Route::get('/', function () {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),

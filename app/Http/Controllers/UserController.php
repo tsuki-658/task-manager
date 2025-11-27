@@ -43,12 +43,14 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $auth = auth()->user();
+        // $user->update($request->all());
 
     $request->validate([
         'name' => 'required',
         'email' => 'required|email|unique:users,email',
         'role' => 'required|in:admin,teacher,user',
         'password' => 'required|min:6',
+        'class_name' => 'nullable|string',
     ]);
 
     // Teacher can only create regular users
@@ -68,6 +70,7 @@ class UserController extends Controller
         'email' => $request->email,
         'role' => $request->role,
         'password' => \Hash::make($request->password),
+        'class_name' => $request->class_name ?? 'irreg',
     ]);
 
     return back()->with('success', 'User created successfully!');
