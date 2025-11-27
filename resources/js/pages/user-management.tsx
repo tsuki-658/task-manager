@@ -127,27 +127,27 @@ export default function UserManagement({ users }: { users: User[] }) {
         name: '',
         email: '',
         role: 'user',
-        class_name: "3A",
+        class_name: '3A',
     });
 
-    function openEdit(user: UserType & { class_name?: string}) {
+    function openEdit(user: UserType & { class_name?: string }) {
         setEditingUser(user);
         editForm.setData({
             name: user.name,
             email: user.email,
             role: user.role,
-            class_name: user.class_name ?? "3A",
+            class_name: user.class_name ?? '3A',
         });
         setEditOpen(true);
     }
 
     const submitEdit = () => {
-    if (!editingUser) return;
+        if (!editingUser) return;
 
-    editForm.put(`/user-management/${editingUser.id}`, {
-        onSuccess: () => setEditOpen(false),
-    });
-};
+        editForm.put(`/user-management/${editingUser.id}`, {
+            onSuccess: () => setEditOpen(false),
+        });
+    };
 
     const [deleteOpen, setDeleteOpen] = React.useState(false);
     const [deletingUser, setDeletingUser] = React.useState<UserType | null>(
@@ -362,79 +362,97 @@ export default function UserManagement({ users }: { users: User[] }) {
             </Dialog>
 
             {/* EDIT MODAL*/}
-          <Dialog open={editOpen} onOpenChange={setEditOpen}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Edit User</DialogTitle>
-    </DialogHeader>
+            <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit User</DialogTitle>
+                    </DialogHeader>
 
-    <div className="space-y-3">
-      <div>
-        <Label>Name</Label>
-        <Input
-          value={editForm.data.name}
-          onChange={(e) => editForm.setData('name', e.target.value)}
-        />
-      </div>
+                    <div className="space-y-3">
+                        <div>
+                            <Label>Name</Label>
+                            <Input
+                                value={editForm.data.name}
+                                onChange={(e) =>
+                                    editForm.setData('name', e.target.value)
+                                }
+                            />
+                        </div>
 
-      <div>
-        <Label>Email</Label>
-        <Input
-          value={editForm.data.email}
-          onChange={(e) => editForm.setData('email', e.target.value)}
-        />
-      </div>
+                        <div>
+                            <Label>Email</Label>
+                            <Input
+                                value={editForm.data.email}
+                                onChange={(e) =>
+                                    editForm.setData('email', e.target.value)
+                                }
+                            />
+                        </div>
 
-      <div>
-        <Label>Role</Label>
-        <Select
-          value={editForm.data.role}
-          onValueChange={(value) => editForm.setData('role', value)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {authUser.role === 'admin' && (
-              <>
-                <SelectItem value="teacher">Teacher</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-              </>
-            )}
-            {authUser.role === 'teacher' && <SelectItem value="user">User</SelectItem>}
-          </SelectContent>
-        </Select>
-      </div>
+                        <div>
+                            <Label>Role</Label>
+                            <Select
+                                value={editForm.data.role}
+                                onValueChange={(value) =>
+                                    editForm.setData('role', value)
+                                }
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {authUser.role === 'admin' && (
+                                        <>
+                                            <SelectItem value="teacher">
+                                                Teacher
+                                            </SelectItem>
+                                            <SelectItem value="user">
+                                                User
+                                            </SelectItem>
+                                        </>
+                                    )}
+                                    {authUser.role === 'teacher' && (
+                                        <SelectItem value="user">
+                                            User
+                                        </SelectItem>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-      {/* Conditional Class select outside of Role SelectContent */}
-      {editForm.data.role === 'user' && (
-        <div>
-          <Label>Class</Label>
-          <Select
-            value={editForm.data.class_name || ''}
-            onValueChange={(value) => editForm.setData('class_name', value)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="3A">3A</SelectItem>
-              <SelectItem value="3B">3B</SelectItem>
-              <SelectItem value="3C">3C</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-    </div>
+                        {/* Conditional Class select outside of Role SelectContent */}
+                        {editForm.data.role === 'user' && (
+                            <div>
+                                <Label>Class</Label>
+                                <Select
+                                    value={editForm.data.class_name || ''}
+                                    onValueChange={(value) =>
+                                        editForm.setData('class_name', value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="3A">3A</SelectItem>
+                                        <SelectItem value="3B">3B</SelectItem>
+                                        <SelectItem value="3C">3C</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                    </div>
 
-    <DialogFooter>
-      <Button onClick={submitEdit} disabled={editForm.processing}>
-        Update
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
+                    <DialogFooter>
+                        <Button
+                            onClick={submitEdit}
+                            disabled={editForm.processing}
+                        >
+                            Update
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* DELETE MODAL*/}
             <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
