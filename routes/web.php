@@ -1,11 +1,13 @@
 <?php
 
-use Inertia\Inertia;
-use Laravel\Fortify\Features;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StudentSubmissionController;
+use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\SubTaskController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use Laravel\Fortify\Features;
+
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -18,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
+    Route::resource('student-submission', StudentSubmissionController::class);
     Route::resource('user-management', UserController::class);
     Route::resource('task', TaskController::class);
 

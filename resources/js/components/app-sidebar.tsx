@@ -32,6 +32,11 @@ const mainNavItems: NavItem[] = [
         href: '/task',
         icon: LayoutGrid,
     },
+    {
+        title: 'Student Submission',
+        href: '/student-submission',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
