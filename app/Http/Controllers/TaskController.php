@@ -14,7 +14,14 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
+
+        $userClass = auth()->user()->class_name ?? 'irreg';
+
+
+        $tasks = Task::where('class_name', $userClass) 
+                ->orWhere('creator_id', auth()->id()) 
+                ->get();
+
 
         return Inertia::render('task', compact('tasks'));
     }
@@ -42,6 +49,7 @@ class TaskController extends Controller
         $task = Task::create([
             'subject' => $validated['subject'],
             'class_name' => $validated['class_name'],
+            'creator_id' => auth()->id(),
         ]);
 
         // If using Inertia + React, return a redirect or JSON

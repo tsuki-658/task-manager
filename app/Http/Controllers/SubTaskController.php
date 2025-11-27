@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use Inertia\Inertia;
+use App\Models\Comment;
 use App\Models\SubTask;
 use App\Models\SubTaskUser;
 use Illuminate\Http\Request;
@@ -106,7 +108,7 @@ class SubTaskController extends Controller
     public function turnIn(Request $request, SubTask $subTask)
     {
         $user = Auth::user();
-
+        
         // Check if previous subtask exists and is done for this user
         $previousSubtask = SubTask::where('task_id', $subTask->task_id)
             ->where('order', '<', $subTask->order ?? 0)
@@ -115,14 +117,14 @@ class SubTaskController extends Controller
 
         if ($previousSubtask) {
             $completed = SubTaskUser::where('user_id', $user->id)
-                ->where('subtask_id', $previousSubtask->id)
+                ->where('sub_task_id', $previousSubtask->id)
                 ->exists();
-
+            
             if (!$completed) {
                 return back()->with('error', 'You must complete the previous subtask first.');
             }
         }
-
+        
         $filePath = null;
         if ($request->hasFile('file')) {
             $filePath = $request->file('file')->store('subtask_files', 'public');
@@ -130,7 +132,7 @@ class SubTaskController extends Controller
 
         $subTaskUser = SubTaskUser::firstOrNew([
             'user_id' => $user->id,
-            'subtask_id' => $subTask->id,
+            'sub_task_id' => $subTask->id,
             'turned_in_at' => now(),
         ]);
         
@@ -152,6 +154,51 @@ class SubTaskController extends Controller
         
 
     }
+
+    public function submissions(SubTask $subtask)
+    {
+        $subtask->load(['users' => function($q) {
+            $q->withPivot(['status', 'file', 'turned_in_at']);
+        }]);
+
+        return Inertia::render('student-submission', [
+            'subtask' => $subtask,
+            'students' => $subtask->users,
+        ]);
+    }
+
+    public function showComments(SubTask $subTask)
+    {
+        $comments = Comment::where('sub_task_id', $subTask->id)
+            ->with('user') // include the poster
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return Inertia::render('comment', [
+            'subTask' => $subTask,
+            'comments' => $comments,
+        ]);
+    }
+
+
+    public function storeComment(Request $request, SubTask $subTask)
+    {
+        $request->validate([
+            'comment' => 'required|string'
+        ]);
+
+        Comment::create([
+            'sub_task_id' => $subTask->id,
+            'user_id' => auth()->id(),
+            'comment' => $request->comment,
+        ]);
+
+        return back();
+    }
+
+
+
+
 
     /**
      * Remove the specified resource from storage.

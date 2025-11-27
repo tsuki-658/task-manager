@@ -154,7 +154,7 @@ export default function SubTask() {
         <div className="space-x-2 text-right">
           <Button size="sm" variant="outline">Edit</Button>
           <Button size="sm" variant="destructive">Delete</Button>
-          <Button size="sm" className="bg-blue-700">View Submission</Button>
+          <Button size="sm" className="bg-blue-700" onClick={() => router.visit(`/sub-task/${row.original.id}/submission`)}>View Submission</Button>
 
         </div>
       ),
@@ -339,46 +339,62 @@ export default function SubTask() {
                           
                         </div>
                       </CardTitle>
-                      {!locked && !done && !missing ? (
-                      <CardContent className="p-0">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm">Add work</Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Submit Work</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-2 py-2">
-                              <Input
-                                type="file"
-                                onChange={(e) =>
-                                  setSelectedFiles({
-                                    ...selectedFiles,
-                                    [sub.id]: e.target.files?.[0] ?? null,
-                                  })
-                                }
-                              />
-                            </div>
-                            <DialogFooter>
-                              <Button
-                                onClick={() => handleTurnIn(sub.id)}
-                                size="sm"
-                              >
-                                Turn in
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                      </CardContent>
-                      )
-                    : 
-                    <div>
-                        {done && <p className="text-green-500">Turned In</p>}
-                        {locked && <p className="text-gray-500">Locked</p>}
-                        {missing && <p className="text-red-600">Missing</p>}
+                      <div className="space-y-2">
+                        
+                        {!locked && !done && !missing ? (
+                        <CardContent className="p-0">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm">Add work</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Submit Work</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-2 py-2">
+                                <Input
+                                  type="file"
+                                  onChange={(e) =>
+                                    setSelectedFiles({
+                                      ...selectedFiles,
+                                      [sub.id]: e.target.files?.[0] ?? null,
+                                    })
+                                  }
+                                />
+                              </div>
+                              <DialogFooter>
+                                <Button
+                                  onClick={() => handleTurnIn(sub.id)}
+                                  size="sm"
+                                >
+                                  Turn in
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                          
+                        </CardContent>
+                        )
+                      : 
+                      <div className="text-center">
+                          {done && <p className="text-green-500">Turned In</p>}
+                          {locked && <p className="text-gray-500">Locked</p>}
+                          {missing && <p className="text-red-600">Missing</p>}
+                          
+                      </div>
+                      }
+                      { done ? 
+                        (
+                          <Button size="sm" variant="outline" onClick={() => router.visit(`/sub-task/${sub.id}/comment`)}>Comment</Button>
+                        )
+                        : missing ? 
+                        (
+                          <Button size="sm" variant="outline" onClick={() => router.visit(`/sub-task/${sub.id}/comment`)}>Comment</Button>
+                        )
+                        : null
+                      }
+                      
                     </div>
-                    }
                     </div>
                     {sub.description && 
                       <CardDescription>{sub.description}</CardDescription>

@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SubTaskUser extends Model
+class Comment extends Model
 {
-    protected $table = 'sub_task_users';
-    protected $fillable = ['sub_task_id', 'user_id', 'file', 'status', 'turned_in_at'];
+    use HasFactory;
 
-    public function subtask()
+    protected $fillable = ['sub_task_id', 'user_id', 'comment'];
+
+    public function subTask()
     {
         return $this->belongsTo(SubTask::class);
     }

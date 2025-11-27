@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import * as React from "react"
 import {
   ColumnDef,
@@ -13,16 +13,15 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+
+import { ArrowUpDown, ChevronDown } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
 import {
   Table,
   TableBody,
@@ -31,98 +30,121 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export type Task = {
-  id: string
-  title: string
-  due_date: string
-  submitted_at: string
-  progress: string
-}
+type StudentPivot = {
+  status: 'submitted' | 'pending' | 'missing';
+  file?: string | null;
+  turned_in_at?: string | null;
+};
 
-const data: Task[] = [
-  {
-    id: "1",
-    title: "Basic C++ Assignment",
-    due_date: "2025-02-10",
-    submitted_at: "Admin",
-    progress: "1/20",
-  },
-  {
-    id: "2",
-    title: "Review project proposal",
-    due_date: "2025-02-15",
-    submitted_at: "Teacher",
-    progress: "in-progress",
-  },
-  {
-    id: "3",
-    title: "Submit final document",
-    due_date: "2025-02-20",
-    submitted_at: "Teacher Rebeca",
-    progress: "completed",
-  },
-]
+type Student = {
+  id: number;
+  name: string;
+  pivot: StudentPivot;
+};
 
-export const columns: ColumnDef<Task>[] = [
-  {
-    accessorKey: "title",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Title
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-  },
-  {
-    accessorKey: "due_date",
-    header: "Due Date",
-    cell: ({ row }) => <div>{row.getValue("due_date")}</div>,
-  },
-  {
-    accessorKey: "submitted_at",
-    header: "Submitted At",
-    cell: ({ row }) => <div>{row.getValue("submitted_at")}</div>,
-  },
-  {
-    accessorKey: "progress",
-    header: "Progress",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("progress")}</div>
-    ),
-  },
-  {
-    id: "File",
-    header: "File",
-    cell: ({ row }) => (
-      <Button size="sm" variant="outline" onClick={() => alert("View: " + row.original.id)}>
-        View
-      </Button>
-    ),
-  },
-  {
-    id: "comment",
-    header: "Actions",
-    cell: ({ row }) => (
-      <Button size="sm" variant="secondary" onClick={() => alert("Comment on: " + row.original.id)}>
-        Comment
-      </Button>
-    ),
-  },
-]
+type PageProps = {
+  subtask: {
+    id: number;
+    title: string;
+    due_date: string | null;
+  };
+  students: Student[];
+};
 
-export default function Dashboard() {
-     const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+export default function StudentSubmission() {
+  const { subtask, students } = usePage<PageProps>().props;
+
+  // Convert student data into table rows
+  const data = students.map((student) => ({
+    id: student.id,
+    subtask_id: subtask.id, 
+    name: student.name,
+    due_date: subtask.due_date
+      ? new Date(subtask.due_date).toLocaleString()
+      : "No due date",
+    submitted_at: student.pivot.turned_in_at
+      ? new Date(student.pivot.turned_in_at).toLocaleString()
+      : "—",
+    status: student.pivot.status,
+    file: student.pivot.file,
+  }));
+
+  const columns: ColumnDef<typeof data[0]>[] = [
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Student Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div className="font-medium ml-3">{row.getValue("name")}</div>,
+    },
+    {
+      accessorKey: "due_date",
+      header: "Due Date",
+      cell: ({ row }) => row.getValue("due_date"),
+    },
+    {
+      accessorKey: "submitted_at",
+      header: "Submitted At",
+      cell: ({ row }) => row.getValue("submitted_at"),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+
+        return (
+          <span
+            className={
+              status === "submitted"
+                ? "text-green-600 font-semibold"
+                : status === "missing"
+                ? "text-red-600 font-semibold"
+                : "text-gray-600"
+            }
+          >
+            {status}
+          </span>
+        );
+      },
+    },
+    {
+      id: "file",
+      header: "File",
+      cell: ({ row }) =>
+        row.original.file ? (
+          <a href={`/storage/${row.original.file}`} target="_blank">
+            <Button size="sm" variant="outline">View</Button>
+          </a>
+        ) : (
+          "—"
+        ),
+    },
+    {
+      id: "comment",
+      header: "Actions",
+      cell: ({ row }) => (
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => router.visit(`/sub-task/${row.original.subtask_id}/comment`)}
+        >
+          Comment
+        </Button>
+      ),
+    },
+  ];
+
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
@@ -139,117 +161,112 @@ export default function Dashboard() {
       columnFilters,
       columnVisibility,
     },
-  })
-    return (
-        <AppLayout>
-            <Head title="Dashboard" />
-            <div className="w-full">
-      {/* FILTER + COLUMN TOGGLE */}
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter tasks..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+  });
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) =>
-                    column.toggleVisibility(!!value)
-                  }
-                  className="capitalize"
-                >
-                  {column.id.replace("_", " ")}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+  return (
+    <AppLayout>
+      <Head title={"Submissions: " + subtask.title} />
 
-      {/* TABLE */}
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
+      <div className="flex flex-col gap-4 p-4">
+        <h1 className="text-2xl font-bold">{subtask.title} – Submissions</h1>
+
+        {/* FILTER + COLUMN TOGGLE */}
+        <div className="flex items-center py-4">
+          <Input
+            placeholder="Search student..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(e) =>
+              table.getColumn("name")?.setFilterValue(e.target.value)
+            }
+            className="max-w-sm"
+          />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                    className="capitalize"
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </TableRow>
-            ))}
-          </TableHeader>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+        {/* TABLE */}
+        <div className="overflow-hidden rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No tasks found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
 
-      {/* PAGINATION */}
-      <div className="flex justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="text-center">
+                    No submissions found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+        {/* PAGINATION */}
+        <div className="flex justify-end space-x-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
-    </div>
-        </AppLayout>
-    );
+    </AppLayout>
+  );
 }

@@ -23,11 +23,14 @@ class Subtask extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'sub_task_users', 'subtask_id', 'user_id')
+        return $this->belongsToMany(User::class, 'sub_task_users', 'sub_task_id', 'user_id')
                     ->withPivot('status', 'file', 'turned_in_at')
                     ->withTimestamps();
     }
 
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'sub_task_id');
+    }
 
 }

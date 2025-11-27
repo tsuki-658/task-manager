@@ -3,22 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Task extends Model
 {
     
-    protected $fillable = ['subject', 'class_name'];
+    use HasFactory;
 
-    public function subtasks()
+    protected $fillable = ['subject', 'class_name', 'creator_id'];
+
+    // The teacher/admin who created the task
+    public function creator()
     {
-        return $this->hasMany(Subtask::class)->orderBy('order');
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
-    // In App\Models\Task.php
-    public function users()
+    // Subtasks of this task
+    public function subTasks()
     {
-        return $this->belongsToMany(User::class, 'task_user', 'task_id', 'user_id');
+        return $this->hasMany(SubTask::class);
     }
-
-
 }

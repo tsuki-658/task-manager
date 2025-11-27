@@ -50,4 +50,29 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
+
+        public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'creator_id');
+    }
+
+    // Submissions of the user
+    public function subTaskSubmissions()
+    {
+        return $this->belongsToMany(SubTask::class, 'sub_task_users')
+                    ->withPivot(['file', 'status', 'turned_in_at'])
+                    ->withTimestamps();
+    }
+
+    // Comments sent
+    public function sentComments()
+    {
+        return $this->hasMany(Comment::class, 'sender_id');
+    }
+
+    // Comments received
+    public function receivedComments()
+    {
+        return $this->hasMany(Comment::class, 'receiver_id');
+    }
 }

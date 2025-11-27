@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\StudentSubmissionController;
-use App\Http\Controllers\SubTaskController;
-use App\Http\Controllers\TaskController;
-use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\SubTaskController;
+use App\Http\Controllers\StudentSubmissionController;
 
 
 Route::get('/', function () {
@@ -25,9 +26,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('task', TaskController::class);
 
     Route::resource('sub-task', SubTaskController::class);
+    // Route::resource('comment', CommentController::class);
 
     Route::post('/sub-task/{subTask}/turn-in', [SubTaskController::class, 'turnIn'])
      ->name('sub-task.turn-in');
+
+     Route::get('/sub-task/{subtask}/submission', [SubTaskController::class, 'submissions']);
+     // Show comments for a specific subtask
+    Route::get('/sub-task/{subTask}/comment', [SubTaskController::class, 'showComments'])->name('sub-task.comment');
+
+    // Store a new comment
+    Route::post('/sub-task/{subTask}/comment', [SubTaskController::class, 'storeComment'])->name('sub-task.comment.store');
+
 
 });
 

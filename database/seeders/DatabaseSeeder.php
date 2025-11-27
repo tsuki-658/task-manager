@@ -33,11 +33,29 @@ class DatabaseSeeder extends Seeder
             ]
         );
         User::firstOrCreate(
+            ['email' => 'teacher2@gmail.com'],
+            [
+                'name' => 'teacher',
+                'password' => Hash::make('password'),
+                'role' => 'teacher',
+            ]
+        );
+        User::firstOrCreate(
             ['email' => 'user@gmail.com'],
             [
                 'name' => 'user',
                 'password' => Hash::make('password'),
                 'role' => 'user',
+                'class_name' => 'IT 3A'
+            ]
+        );
+        User::firstOrCreate(
+            ['email' => 'user2@gmail.com'],
+            [
+                'name' => 'user',
+                'password' => Hash::make('password'),
+                'role' => 'user',
+                'class_name' => 'IT 3B'
             ]
         );
     }
