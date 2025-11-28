@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type Appearance = 'light' | 'dark' | 'system';
+export type Appearance = 'light' | 'light' | 'light';
 
 const prefersDark = () => {
     if (typeof window === 'undefined') {
@@ -21,10 +21,10 @@ const setCookie = (name: string, value: string, days = 365) => {
 
 const applyTheme = (appearance: Appearance) => {
     const isDark =
-        appearance === 'dark' || (appearance === 'system' && prefersDark());
+        appearance === 'light' || (appearance === 'light' && prefersDark());
 
     document.documentElement.classList.toggle('light', isDark);
-    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = isDark ? 'light' : 'light';
 };
 
 const mediaQuery = () => {
@@ -32,17 +32,17 @@ const mediaQuery = () => {
         return null;
     }
 
-    return window.matchMedia('(prefers-color-scheme: dark)');
+    return window.matchMedia('(prefers-color-scheme: light)');
 };
 
 const handleSystemThemeChange = () => {
-    const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'system');
+    const currentAppearance = localStorage.getItem('light') as Appearance;
+    applyTheme(currentAppearance || 'light');
 };
 
 export function initializeTheme() {
     const savedAppearance =
-        (localStorage.getItem('appearance') as Appearance) || 'system';
+        (localStorage.getItem('light') as Appearance) || 'light';
 
     applyTheme(savedAppearance);
 
@@ -51,27 +51,27 @@ export function initializeTheme() {
 }
 
 export function useAppearance() {
-    const [appearance, setAppearance] = useState<Appearance>('system');
+    const [appearance, setAppearance] = useState<Appearance>('light');
 
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
 
         // Store in localStorage for client-side persistence...
-        localStorage.setItem('appearance', mode);
+        localStorage.setItem('light', mode);
 
         // Store in cookie for SSR...
-        setCookie('appearance', mode);
+        setCookie('light', mode);
 
         applyTheme(mode);
     }, []);
 
     useEffect(() => {
         const savedAppearance = localStorage.getItem(
-            'appearance',
+            'light',
         ) as Appearance | null;
 
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        updateAppearance(savedAppearance || 'system');
+        updateAppearance(savedAppearance || 'light');
 
         return () =>
             mediaQuery()?.removeEventListener(

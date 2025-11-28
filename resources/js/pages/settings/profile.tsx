@@ -1,6 +1,6 @@
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import { send } from '@/routes/verification';
-import { type BreadcrumbItem, type SharedData } from '@/types';
+import { User, type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 
@@ -10,6 +10,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
@@ -28,7 +29,7 @@ export default function Profile({
     mustVerifyEmail: boolean;
     status?: string;
 }) {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, tasks } = usePage<SharedData>().props as any;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -89,6 +90,30 @@ export default function Profile({
                                     />
                                 </div>
 
+                                {auth.user.role === 'user' && (
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="class_name">Section (Class)</Label>
+                                        
+
+                                        <div className="p-2 border rounded-md ">
+  {auth.user.class_name}
+</div>
+
+                                        <Input
+                                            id="class_name"
+                                            type="hidden"
+                                            defaultValue={auth.user.class_name || ''}
+                                            name="class_name"
+                                        />
+
+                                        <InputError
+                                            className="mt-2"
+                                            message={errors.class_name}
+                                        />
+                                    </div>
+                                )}
+
+
                                 {mustVerifyEmail &&
                                     auth.user.email_verified_at === null && (
                                         <div>
@@ -141,7 +166,8 @@ export default function Profile({
                     </Form>
                 </div>
 
-                <DeleteUser />
+
+                    <DeleteUser />
             </SettingsLayout>
         </AppLayout>
     );

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Task;
 
 class ProfileController extends Controller
 {
@@ -18,9 +19,17 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $userClass = $request->user()->class_name ?? null;
+
+        $tasks = Task::when($userClass, function ($query, $userClass) use ($request) {
+            $query->where('class_name', $userClass)
+                  ->orWhere('creator_id', $request->user()->id);
+        })->get();
+
         return Inertia::render('settings/profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'tasks' => $tasks,
         ]);
     }
 
