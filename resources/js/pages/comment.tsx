@@ -2,8 +2,8 @@ import Heading from "@/components/heading";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
-import { CommentType, SubTaskType, User } from "@/types";
-import { Head, useForm } from "@inertiajs/react";
+import { CommentType, SharedData, SubTaskType, User } from "@/types";
+import { Head, useForm, usePage } from "@inertiajs/react";
 import { SendHorizontal } from "lucide-react";
 
 interface CommentPageProps {
@@ -14,6 +14,7 @@ interface CommentPageProps {
 }
 
 export default function Comment({ subTask, comments, student, creator }: CommentPageProps) {
+    const { auth } = usePage<SharedData>().props;
    const { data, setData, post, processing } = useForm({ 
     comment: '',
     teacher_id: creator.id,
@@ -47,12 +48,17 @@ export default function Comment({ subTask, comments, student, creator }: Comment
                                 {comments.length <= 0 && (
                                     <CardDescription>No Comment yet</CardDescription>
                                 )}
-                                {comments.map(comment => (
+                                {comments.map(comment => {
+                                    const isTeacher = subTask.task.creator_id === comment.sender_id;
+                                    const role = isTeacher ? 'Teacher' : 'Student'
+                                    return (
+
+                                    
                                     <div key={comment.id} className="grid grid-cols-[auto_1fr] gap-2">
-                                        <p className="font-medium">{comment.user.name}:</p>
+                                        <p className="font-medium">{role}</p>
                                         <p>{comment.comment}</p>
                                     </div>
-                                ))}
+                                )})}
 
                             </div>
                         </CardContent>

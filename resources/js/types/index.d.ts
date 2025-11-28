@@ -49,19 +49,23 @@ export interface Task {
     title: string
     description: string
     class_name: string
-    uploader_id: number
+    creator_id: number
     progress: number 
     due_date: string
 }
 
 export type CommentType = {
   id: number;
-  user_id: number;
+  student_id: number;
+  teacher_id: number;
   sub_task_id: number;
   comment: string;
   created_at: string;
   updated_at: string;
-  user: User; // eager-loaded user
+  sender_id: number;
+  
+  student?: User | null;
+  teacher?: User | null;// eager-loaded user
 };
 
 export type SubTaskType = {
@@ -69,4 +73,6 @@ export type SubTaskType = {
   title: string;
   description?: string | null;
   due_date?: string | null;
+
+  task: Task
 };

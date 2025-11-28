@@ -9,7 +9,7 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sub_task_id', 'teacher_id', 'student_id', 'comment'];
+    protected $fillable = ['sub_task_id', 'teacher_id', 'student_id', 'sender_id' ,'comment'];
 
     public function subTask()
     {
@@ -18,6 +18,6 @@ class Comment extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(User::class, 'sender_id');
     }
 }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade'); 
             $table->foreignId('student_id')->constrained('users')->onDelete('cascade'); 
             $table->foreignId('sub_task_id')->constrained()->onDelete('cascade'); 
+            $table->foreignId('sender_id')->constrained('users')->onDelete('cascade'); 
             $table->text('comment'); // actual comment text
             $table->timestamps();
         });

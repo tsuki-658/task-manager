@@ -173,9 +173,9 @@ class SubTaskController extends Controller
         $subTask->load('task');
         $comments = Comment::where('sub_task_id', $subTask->id)
             ->where('student_id', $studentId)
-            ->with('user') 
             ->orderBy('created_at', 'asc')
             ->get();
+
         $student = User::where('id', $studentId)->first();
         // creator of the task
 
@@ -201,6 +201,7 @@ class SubTaskController extends Controller
             'sub_task_id' => $subTask->id,
             'teacher_id' => $request->teacher_id,
             'student_id' => $request->student_id,
+            'sender_id' => auth()->id(),
             'comment' => $request->comment,
         ]);
 
