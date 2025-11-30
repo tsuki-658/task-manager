@@ -15,21 +15,24 @@ class TaskController extends Controller
      */
     public function index()
     {
-
         $userClass = auth()->user()->class_name ?? 'irreg';
-        
+        $userRole = auth()->user()->role;
 
-        if(auth()->user()->role !== 'user'){
+        if ($userRole === 'admin') {
+            // Admin sees all tasks
+            $tasks = Task::withCount('subTasks')->get();
+        } elseif ($userRole === 'teacher') {
+            // Teacher sees only their own created tasks
             $tasks = Task::where('creator_id', auth()->id())
                     ->withCount('subTasks')
                     ->get();
-        }else{
+        } else {
+            // Regular users see tasks for their class or tasks they are assigned to
             $tasks = Task::where('class_name', $userClass)
                 ->orWhere('creator_id', auth()->id())
                 ->withCount('subTasks')
                 ->get();
         }
-
 
         return Inertia::render('task', compact('tasks'));
     }
