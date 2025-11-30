@@ -12,27 +12,35 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, FilePenLine, Folder, LayoutGrid, UsersIcon } from 'lucide-react';
 import AppLogo from './app-logo';
+import { usePage } from '@inertiajs/react';
+import { SharedData } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'User Management',
-        href: '/user-management',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Task management',
-        href: '/task',
-        icon: LayoutGrid,
-    },
-];
+// mainNavItems are built per-user below so we can hide links for regular users
 
 const footerNavItems: NavItem[] = [
    
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
+
+    const mainNavItems: NavItem[] = [];
+
+    if (auth?.user?.role && auth.user.role !== 'user') {
+        mainNavItems.push({
+            title: 'User Management',
+            href: '/user-management',
+            icon: UsersIcon,
+        });
+    }
+
+    mainNavItems.push({
+        title: auth.user && auth.user.role === 'user' ? 'Tasks' : 'Task management',
+        href: '/task',
+        icon: FilePenLine,
+    });
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
